@@ -1,4 +1,4 @@
-https://georgeeduardtp.github.io/NextLab/
+https://nexttlab.github.io/NextLab-landing/
 # NextLab - Agencia de Marketing Digital
 
 Una web moderna y elegante para agencia de marketing digital y desarrollo web, con tema oscuro y detalles morados.
@@ -88,3 +88,4 @@ Proyecto desarrollado para NextLab - Agencia de Marketing Digital
 
 
 **Desarrollado con ❤️ y tema oscuro 🌙** 
+
