@@ -51,14 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Form submission
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        if (validateForm()) {
-            submitForm();
-        }
-    });
+    // (Eliminado manejador duplicado de submit; se mantiene el mejorado más abajo)
 
     // Validate individual field
     function validateField(fieldName, field) {
@@ -173,42 +166,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Submit form
     function submitForm() {
-        // Show loading state
+        // Estado cargando
         setSubmitButtonState('loading');
-        
-        // Collect form data
+
+        // Datos del formulario
         const formData = new FormData(contactForm);
         const data = {};
-        
-        // Convert FormData to object
         for (let [key, value] of formData.entries()) {
             data[key] = value;
         }
-        
-        // Add checkbox values
         data.newsletter = document.getElementById('newsletter').checked;
         data.terms = document.getElementById('terms').checked;
-        
-        // Simulate API call
-        setTimeout(() => {
-            // Here you would typically send data to your backend
-            console.log('Form data:', data);
-            
-            // Show success message
-            showSuccessMessage();
-            
-            // Reset form
-            contactForm.reset();
-            
-            // Reset button state
-            setSubmitButtonState('success');
-            
-            // Reset button to normal after 3 seconds
-            setTimeout(() => {
+
+        // Mapea variables a tu plantilla de EmailJS
+        const templateParams = {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            phone: data.phone || '',
+            company: data.company || '',
+            service: data.service || '',
+            budget: data.budget || '',
+            message: data.message,
+            newsletter: data.newsletter ? 'Sí' : 'No'
+        };
+
+        // Reemplaza con tus IDs reales de EmailJS
+        const SERVICE_ID = 'service_rvnk245';
+        const TEMPLATE_ID = 'template_q51o1z3';
+
+        emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+            .then(() => {
+                showSuccessMessage();
+                contactForm.reset();
+                setSubmitButtonState('success');
+                setTimeout(() => setSubmitButtonState('normal'), 3000);
+            })
+            .catch((error) => {
+                console.error('EmailJS error:', error);
+                alert('No se pudo enviar el mensaje. Intenta nuevamente.');
                 setSubmitButtonState('normal');
-            }, 3000);
-            
-        }, 2000); // Simulate network delay
+            });
     }
 
     // Set submit button state
