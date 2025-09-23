@@ -26,6 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
             pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
             message: 'Por favor ingresa un email válido'
         },
+        emailConfirm: {
+            required: true,
+            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: 'Por favor repite un email válido'
+        },
         phone: {
             required: false,
             pattern: /^[\+]?[1-9][\d]{0,15}$/,
@@ -35,10 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
             required: true,
             minLength: 10,
             message: 'El mensaje debe tener al menos 10 caracteres'
-        },
-        terms: {
-            required: true,
-            message: 'Debes aceptar los términos y condiciones'
         }
     };
 
@@ -103,6 +104,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 isValid = false;
             }
         });
+        
+        // Validación adicional: email y emailConfirm deben coincidir
+        const emailField = document.getElementById('email');
+        const emailConfirmField = document.getElementById('emailConfirm');
+        if (emailField && emailConfirmField) {
+            const emailValue = emailField.value.trim();
+            const emailConfirmValue = emailConfirmField.value.trim();
+            if (emailValue !== emailConfirmValue) {
+                showFieldError('emailConfirm', emailConfirmField, 'Los correos no coinciden');
+                isValid = false;
+            }
+        }
         
         return isValid;
     }
@@ -175,8 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let [key, value] of formData.entries()) {
             data[key] = value;
         }
-        data.newsletter = document.getElementById('newsletter').checked;
-        data.terms = document.getElementById('terms').checked;
+        // Eliminados newsletter y terms
 
         // Mapea variables a tu plantilla de EmailJS
         const templateParams = {
@@ -187,8 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
             company: data.company || '',
             service: data.service || '',
             budget: data.budget || '',
-            message: data.message,
-            newsletter: data.newsletter ? 'Sí' : 'No'
+            message: data.message
         };
 
         // Reemplaza con tus IDs reales de EmailJS
@@ -269,13 +280,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Smooth scrolling for form focus
     function scrollToElement(element) {
-        const headerHeight = document.querySelector('.navbar').offsetHeight;
-        const elementPosition = element.offsetTop - headerHeight - 20;
-        
-        window.scrollTo({
-            top: elementPosition,
-            behavior: 'smooth'
-        });
+        const header = document.querySelector('.navbar');
+        const headerHeight = header ? header.offsetHeight : 0;
+        const rect = element.getBoundingClientRect();
+        const absoluteTop = window.pageYOffset + rect.top;
+        const target = Math.max(absoluteTop - headerHeight - 20, 0);
+        window.scrollTo({ top: target, behavior: 'smooth' });
     }
 
     // Focus on first invalid field
@@ -290,14 +300,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Enhanced form validation with scroll to error
+    // Enhanced form validation with scroll to form start on error
     contactForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
         if (validateForm()) {
             submitForm();
         } else {
-            // Focus on first invalid field
+            // Scroll to the start of the contact form section, then focus first invalid field
+            const formSection = document.querySelector('.contact-form-section') || contactForm;
+            scrollToElement(formSection);
             setTimeout(focusFirstInvalidField, 100);
         }
     });
